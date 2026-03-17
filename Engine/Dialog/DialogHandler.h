@@ -1,6 +1,7 @@
 #ifndef DIALOGHANDLER_H
 #define DIALOGHANDLER_H
 
+#include <list>
 #include <memory>
 #include "DialogBox.h"
 

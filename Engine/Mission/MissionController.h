@@ -3,6 +3,7 @@
 
 #include <SFML/Graphics.hpp>
 #include <nlohmann/json.hpp>
+#include <list>
 
 #include "Background.h"
 #include "Camera.h"

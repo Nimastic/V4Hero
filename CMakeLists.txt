@@ -52,10 +52,38 @@ FetchContent_Declare(spdlog
         GIT_TAG v1.15.2)
 FetchContent_MakeAvailable(spdlog)
 
+# Build libzip from source so it uses the correct target architecture
+set(ENABLE_COMMONCRYPTO OFF CACHE BOOL "" FORCE)
+set(ENABLE_GNUTLS OFF CACHE BOOL "" FORCE)
+set(ENABLE_MBEDTLS OFF CACHE BOOL "" FORCE)
+set(ENABLE_OPENSSL OFF CACHE BOOL "" FORCE)
+set(ENABLE_WINDOWS_CRYPTO OFF CACHE BOOL "" FORCE)
+set(ENABLE_BZIP2 OFF CACHE BOOL "" FORCE)
+set(ENABLE_LZMA OFF CACHE BOOL "" FORCE)
+set(ENABLE_ZSTD OFF CACHE BOOL "" FORCE)
+set(BUILD_TOOLS OFF CACHE BOOL "" FORCE)
+set(BUILD_REGRESS OFF CACHE BOOL "" FORCE)
+set(BUILD_EXAMPLES OFF CACHE BOOL "" FORCE)
+set(BUILD_DOC OFF CACHE BOOL "" FORCE)
+FetchContent_Declare(libzip_src
+        GIT_REPOSITORY https://github.com/nih-at/libzip.git
+        GIT_TAG v1.10.1)
+FetchContent_MakeAvailable(libzip_src)
+
+# Create the libzip::zip alias that libzippp expects (if not already provided)
+if (NOT TARGET libzip::zip)
+    add_library(libzip::zip ALIAS zip)
+endif()
+
 FetchContent_Declare(libzippp
         GIT_REPOSITORY https://github.com/ctabin/libzippp
         GIT_TAG libzippp-v7.1-1.10.1)
 FetchContent_MakeAvailable(libzippp)
+
+FetchContent_Declare(Catch2
+        GIT_REPOSITORY https://github.com/catchorg/Catch2.git
+        GIT_TAG v3.5.2)
+FetchContent_MakeAvailable(Catch2)
 
 set(ENGINE_FILES
         Engine/Func.cpp
@@ -160,7 +188,6 @@ set(DISCORD_FILES
 
 add_executable(V4Hero ${ENGINE_FILES} ${DISCORD_FILES} main.cpp)
 
-find_package(Catch2 REQUIRED)
 add_executable(
         tests
         ${ENGINE_FILES}
@@ -205,7 +232,9 @@ if(MSVC)
     target_compile_definitions(V4Hero PRIVATE _USE_MATH_DEFINES=1)
 
 else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc")
+    if(NOT APPLE)
+        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -static-libstdc++ -static-libgcc")
+    endif()
     target_compile_options(V4Hero PRIVATE -Wall -Wextra)
 endif()
 
